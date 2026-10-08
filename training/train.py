@@ -25,7 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.preprocessing import TextPreprocessor
 
 
-def load_data(data_path='data/sample_reviews.csv'):
+def load_data(data_path=None):
     """
     Load and validate the review dataset.
 
@@ -35,6 +35,12 @@ def load_data(data_path='data/sample_reviews.csv'):
     Returns:
         pd.DataFrame: Loaded dataset.
     """
+    if data_path is None:
+        if os.path.exists('data/fake_reviews_dataset.csv'):
+            data_path = 'data/fake_reviews_dataset.csv'
+        else:
+            data_path = 'data/sample_reviews.csv'
+
     if not os.path.exists(data_path):
         print(f"[ERROR] Dataset not found at: {data_path}")
         print("[INFO]  Place your dataset in data/ or use the sample data.")
@@ -42,7 +48,7 @@ def load_data(data_path='data/sample_reviews.csv'):
         sys.exit(1)
 
     df = pd.read_csv(data_path)
-    print(f"[INFO] Loaded dataset: {len(df)} rows")
+    print(f"[INFO] Loaded real dataset: {len(df)} rows from {data_path}")
     print(f"[INFO] Columns: {list(df.columns)}")
 
     return df
@@ -236,7 +242,7 @@ def main():
     print("=" * 60)
 
     # Load data
-    data_path = os.getenv('TRAINING_DATA', 'data/sample_reviews.csv')
+    data_path = os.getenv('TRAINING_DATA', None)
     df = load_data(data_path)
 
     # Preprocess

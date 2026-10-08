@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.preprocessing import TextPreprocessor
 
 
-def evaluate_model(model_path='models/fake_review_model.pkl', data_path='data/sample_reviews.csv'):
+def evaluate_model(model_path='models/fake_review_model.pkl', data_path=None):
     """
     Evaluate a trained model on the dataset.
 
@@ -29,6 +29,11 @@ def evaluate_model(model_path='models/fake_review_model.pkl', data_path='data/sa
         model_path (str): Path to the saved model.
         data_path (str): Path to evaluation data.
     """
+    if data_path is None:
+        if os.path.exists('data/fake_reviews_dataset.csv'):
+            data_path = 'data/fake_reviews_dataset.csv'
+        else:
+            data_path = 'data/sample_reviews.csv'
     if not os.path.exists(model_path):
         print(f"[ERROR] Model not found: {model_path}")
         print("[INFO]  Run 'python -m training.train' first.")

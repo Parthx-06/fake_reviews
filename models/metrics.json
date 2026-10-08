@@ -1,10 +1,10 @@
 {
   "model_type": "logistic_regression",
-  "accuracy": 0.9474,
-  "auc_roc": 1.0,
-  "cv_mean": 0.9457,
-  "cv_std": 0.0502,
-  "train_size": 73,
-  "test_size": 19,
-  "n_features": 282
+  "accuracy": 0.8954,
+  "auc_roc": 0.9624,
+  "cv_mean": 0.897,
+  "cv_std": 0.006,
+  "train_size": 32345,
+  "test_size": 8087,
+  "n_features": 10000
 }
