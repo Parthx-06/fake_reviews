@@ -1,0 +1,2 @@
+# This directory stores trained model artifacts.
+# Run `python -m training.train` to generate the model file.

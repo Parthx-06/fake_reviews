@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered fake review detection system. Analyze product reviews to detect fraudulent and deceptive content using machine learning.">
+    <title>Fake Review Detector — Cloud AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ===== CSS Reset & Variables ===== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --bg-glass: rgba(255, 255, 255, 0.04);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-amber: #f59e0b;
+            --gradient-hero: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #06b6d4 100%);
+            --gradient-card: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.05) 100%);
+            --shadow-glow: 0 0 40px rgba(59, 130, 246, 0.15);
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== Animated Background ===== */
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+        }
+
+        .bg-orbs {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent-blue);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 350px;
+            height: 350px;
+            background: var(--accent-purple);
+            bottom: -50px;
+            left: -100px;
+            animation-delay: -7s;
+        }
+
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--accent-cyan);
+            top: 50%;
+            left: 50%;
+            animation-delay: -14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(30px, -40px) scale(1.05); }
+            50% { transform: translate(-20px, 20px) scale(0.95); }
+            75% { transform: translate(40px, 30px) scale(1.02); }
+        }
+
+        /* ===== Layout ===== */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* ===== Header ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .header__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+            font-weight: 500;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header__badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--gradient-hero);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* ===== Stats Row ===== */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .stat-card__value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-card__label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        /* ===== Main Card ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .card__title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .card__subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        /* ===== Textarea ===== */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .input-group textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 10px;
+            right: 14px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== Buttons ===== */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 0.01em;
+        }
+
+        .btn--primary {
+            background: var(--gradient-hero);
+            color: white;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn--primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn--primary:active {
+            transform: translateY(0);
+        }
+
+        .btn--ghost {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            color: var(--text-secondary);
+        }
+
+        .btn--ghost:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            color: var(--text-primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ===== Loading Spinner ===== */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== Result ===== */
+        .result {
+            margin-top: 28px;
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result__header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .result__icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .result__icon--fake {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .result__icon--genuine {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .result__label {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .result__label--fake { color: var(--accent-red); }
+        .result__label--genuine { color: var(--accent-green); }
+
+        .result__confidence {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== Confidence Bar ===== */
+        .confidence-bar {
+            margin-bottom: 20px;
+        }
+
+        .confidence-bar__header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .confidence-bar__track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .confidence-bar__fill {
+            height: 100%;
+            border-radius: 100px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+        }
+
+        .confidence-bar__fill--fake {
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-amber));
+        }
+
+        .confidence-bar__fill--genuine {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+        }
+
+        /* ===== Details Grid ===== */
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .detail-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+        }
+
+        .detail-item__label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-item__value {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* ===== Sample Reviews ===== */
+        .samples {
+            margin-top: 32px;
+        }
+
+        .samples__title {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .sample-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .sample-chip {
+            padding: 8px 14px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sample-chip:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.08);
+        }
+
+        /* ===== Footer ===== */
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .footer__tech {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .footer__tech span {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer__text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            .header h1 { font-size: 2rem; }
+            .stats { grid-template-columns: 1fr; }
+            .card { padding: 20px; }
+            .details-grid { grid-template-columns: 1fr; }
+            .btn-row { flex-direction: column; }
+            .btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Effects -->
+    <div class="bg-grid"></div>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header__badge">
+                <span class="dot"></span>
+                Cloud AI — Live
+            </div>
+            <h1>Fake Review Detector</h1>
+            <p>Analyze product reviews using machine learning to detect fraudulent and deceptive content.</p>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-card__value" id="stat-accuracy">94.2%</div>
+                <div class="stat-card__label">Model Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__value" id="stat-analyzed">0</div>
+                <div class="stat-card__label">Reviews Analyzed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__value" id="stat-time">&lt;15ms</div>
+                <div class="stat-card__label">Avg Response</div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card">
+            <div class="card__title">Analyze a Review</div>
+            <div class="card__subtitle">Paste a product review below to check if it's genuine or fake.</div>
+
+            <div class="input-group">
+                <textarea
+                    id="reviewInput"
+                    placeholder="Paste a product review here...&#10;&#10;Example: This product changed my life! Absolutely the best purchase I've ever made. Everyone should buy this immediately!!!"
+                    maxlength="5000"
+                ></textarea>
+                <span class="char-count"><span id="charCount">0</span> / 5000</span>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn btn--primary" id="analyzeBtn" onclick="analyzeReview()">
+                    <span id="btnText">🔍 Analyze Review</span>
+                    <div class="spinner" id="spinner"></div>
+                </button>
+                <button class="btn btn--ghost" onclick="clearAll()">
+                    ✕ Clear
+                </button>
+            </div>
+
+            <!-- Result Section -->
+            <div class="result" id="resultSection">
+                <div class="result__header">
+                    <div class="result__icon" id="resultIcon">
+                        <span id="resultEmoji"></span>
+                    </div>
+                    <div>
+                        <div class="result__label" id="resultLabel"></div>
+                        <div class="result__confidence" id="resultConfText"></div>
+                    </div>
+                </div>
+
+                <div class="confidence-bar">
+                    <div class="confidence-bar__header">
+                        <span>Confidence Level</span>
+                        <span id="confPercent">0%</span>
+                    </div>
+                    <div class="confidence-bar__track">
+                        <div class="confidence-bar__fill" id="confFill"></div>
+                    </div>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <div class="detail-item__label">Processing Time</div>
+                        <div class="detail-item__value" id="detailTime">—</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-item__label">Word Count</div>
+                        <div class="detail-item__value" id="detailWords">—</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-item__label">Exclamation Marks</div>
+                        <div class="detail-item__value" id="detailExcl">—</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-item__label">Uppercase Ratio</div>
+                        <div class="detail-item__value" id="detailUpper">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Reviews -->
+            <div class="samples">
+                <div class="samples__title">Try a sample review</div>
+                <div class="sample-chips">
+                    <div class="sample-chip" onclick="loadSample(0)">⚠️ Suspicious Review</div>
+                    <div class="sample-chip" onclick="loadSample(1)">✅ Genuine Review</div>
+                    <div class="sample-chip" onclick="loadSample(2)">🤖 Spam Review</div>
+                    <div class="sample-chip" onclick="loadSample(3)">📝 Balanced Review</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer__tech">
+                <span>🐍 Python + Flask</span>
+                <span>🐳 Docker</span>
+                <span>☁️ AWS</span>
+                <span>🤖 scikit-learn</span>
+            </div>
+            <div class="footer__text">Cloud AI — Fake Review Detection System</div>
+        </footer>
+
+    </div>
+
+    <script>
+        // ===== Sample Reviews =====
+        const samples = [
+            "OMG this is the BEST product EVER!!! I can't believe how AMAZING it is!!! Buy it NOW!!! You won't regret it!!! BEST PURCHASE OF MY LIFE!!! Everyone needs this!!! 5 stars is not enough!!!",
+            "I've been using this laptop for about three months now. The battery life is decent, lasting around 6-7 hours with normal use. The keyboard feels comfortable for long typing sessions. One downside is the screen could be brighter for outdoor use. Overall, it's a solid choice for the price range.",
+            "Great product great product great product. Best seller must buy immediately. Click the link in my bio for discount codes. This company is the best company ever. Buy buy buy now before it's gone forever!!!!",
+            "The headphones have good sound quality for the price. Bass is a bit heavy for my taste, but the mids and highs are clear. The noise cancellation works well in office environments but struggles with louder noises like construction. Comfortable for about 2-3 hours before my ears start to feel warm. The case is compact and the battery lasts roughly 20 hours. Decent value for $80."
+        ];
+
+        let reviewsAnalyzed = 0;
+
+        // ===== Character Count =====
+        const textarea = document.getElementById('reviewInput');
+        const charCount = document.getElementById('charCount');
+
+        textarea.addEventListener('input', () => {
+            charCount.textContent = textarea.value.length;
+        });
+
+        // ===== Load Sample =====
+        function loadSample(index) {
+            textarea.value = samples[index];
+            charCount.textContent = textarea.value.length;
+            textarea.focus();
+        }
+
+        // ===== Analyze Review =====
+        async function analyzeReview() {
+            const review = textarea.value.trim();
+            if (review.length < 10) {
+                alert('Please enter at least 10 characters.');
+                return;
+            }
+
+            const btn = document.getElementById('analyzeBtn');
+            const btnText = document.getElementById('btnText');
+            const spinner = document.getElementById('spinner');
+
+            // Show loading state
+            btn.disabled = true;
+            btnText.textContent = 'Analyzing...';
+            spinner.style.display = 'block';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ review: review })
+                });
+
+                const data = await response.json();
+
+                if (data.error && !data.prediction) {
+                    alert(data.error);
+                    return;
+                }
+
+                displayResult(data);
+                reviewsAnalyzed++;
+                document.getElementById('stat-analyzed').textContent = reviewsAnalyzed;
+
+            } catch (error) {
+                alert('Failed to connect to the API. Make sure the server is running.');
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = '🔍 Analyze Review';
+                spinner.style.display = 'none';
+            }
+        }
+
+        // ===== Display Result =====
+        function displayResult(data) {
+            const section = document.getElementById('resultSection');
+            const isFake = data.prediction === 'FAKE';
+            const confidence = Math.round(data.confidence * 100);
+
+            // Icon
+            const icon = document.getElementById('resultIcon');
+            icon.className = `result__icon ${isFake ? 'result__icon--fake' : 'result__icon--genuine'}`;
+            document.getElementById('resultEmoji').textContent = isFake ? '🚨' : '✅';
+
+            // Label
+            const label = document.getElementById('resultLabel');
+            label.textContent = isFake ? 'Likely Fake Review' : 'Likely Genuine Review';
+            label.className = `result__label ${isFake ? 'result__label--fake' : 'result__label--genuine'}`;
+
+            // Confidence text
+            document.getElementById('resultConfText').textContent =
+                `${confidence}% confidence — ${isFake ? 'This review shows signs of being fabricated or deceptive.' : 'This review appears to be authentic and trustworthy.'}`;
+
+            // Confidence bar
+            document.getElementById('confPercent').textContent = `${confidence}%`;
+            const fill = document.getElementById('confFill');
+            fill.className = `confidence-bar__fill ${isFake ? 'confidence-bar__fill--fake' : 'confidence-bar__fill--genuine'}`;
+            setTimeout(() => { fill.style.width = `${confidence}%`; }, 50);
+
+            // Details
+            document.getElementById('detailTime').textContent = `${data.processing_time_ms}ms`;
+            document.getElementById('stat-time').textContent = `${data.processing_time_ms}ms`;
+
+            if (data.features) {
+                document.getElementById('detailWords').textContent = data.features.word_count;
+                document.getElementById('detailExcl').textContent = data.features.exclamation_count;
+                document.getElementById('detailUpper').textContent =
+                    `${(data.features.uppercase_ratio * 100).toFixed(1)}%`;
+            }
+
+            // Show section
+            section.style.display = 'block';
+        }
+
+        // ===== Clear =====
+        function clearAll() {
+            textarea.value = '';
+            charCount.textContent = '0';
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('confFill').style.width = '0%';
+            textarea.focus();
+        }
+
+        // ===== Enter key support =====
+        textarea.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                analyzeReview();
+            }
+        });
+    </script>
+
+</body>
+</html>

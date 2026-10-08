@@ -1,0 +1,56 @@
+# Environment
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+venv/
+env/
+.venv/
+
+# Model artifacts (large files)
+models/*.pkl
+models/*.joblib
+models/*.h5
+
+# Data (large files)
+data/*.csv
+!data/sample_reviews.csv
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# AWS
+.aws/
+
+# Logs
+*.log
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Coverage
+htmlcov/
+.coverage
+.pytest_cache/
