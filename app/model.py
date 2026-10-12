@@ -35,6 +35,8 @@ class FakeReviewModel:
                 artifacts = joblib.load(self.model_path)
                 self.model = artifacts['model']
                 self.vectorizer = artifacts['vectorizer']
+                if not hasattr(self.model, 'multi_class'):
+                    self.model.multi_class = 'auto'
                 self.is_loaded = True
                 print(f"[INFO] Model loaded from {self.model_path}")
                 return True
@@ -123,6 +125,8 @@ class FakeReviewModel:
         text_vector = self.vectorizer.transform([cleaned_text])
 
         # Predict
+        if not hasattr(self.model, 'multi_class'):
+            self.model.multi_class = 'auto'
         prediction = self.model.predict(text_vector)[0]
         probabilities = self.model.predict_proba(text_vector)[0]
 

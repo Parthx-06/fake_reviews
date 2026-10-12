@@ -35,12 +35,12 @@
 
 | Key | Value | Status |
 |-----|-------|--------|
-| `AWS_ACCESS_KEY_ID` | `AKIA5Z3VRZNYFMTEXA62` | ✅ Configured |
-| `AWS_SECRET_ACCESS_KEY` | `UJmZ...` (in .env) | ✅ Configured |
-| `AWS_DEFAULT_REGION` | `ap-southeast-2` | ✅ Verified |
-| `AWS_ACCOUNT_ID` | `948897434480` | ✅ Verified |
-| `S3_BUCKET_NAME` | `fake-review-detector` | ✅ Created & Active |
-| `ECR_REPOSITORY_URI` | `948897434480.dkr.ecr.ap-southeast-2.amazonaws.com/fake-review-detector` | ✅ Created & Active |
+| `AWS_ACCESS_KEY_ID` | `AKIAQJXFRD5HM6OXMGKR` | ✅ Configured |
+| `AWS_SECRET_ACCESS_KEY` | `PEUX...` (in .env) | ✅ Configured |
+| `AWS_DEFAULT_REGION` | `us-east-1` | ✅ Verified |
+| `AWS_ACCOUNT_ID` | `020882464590` | ✅ Verified |
+| `S3_BUCKET_NAME` | `fake-review-detector-020882464590` | ✅ Created & Active |
+| `ECR_REPOSITORY_URI` | `020882464590.dkr.ecr.us-east-1.amazonaws.com/fake-review-detector` | ✅ Created & Active |
 | `DOCKER_USERNAME` | `parthb666` | ✅ Ready |
 | `GITHUB_REPO` | `https://github.com/Parthx-06/fake_reviews.git` | ✅ Linked |
 
@@ -63,7 +63,7 @@ aws s3 mb s3://fake-review-detection-<your-unique-id> --region us-east-1
 
 | Key | Value | Status |
 |-----|-------|--------|
-| `S3_BUCKET_NAME` | `fake-review-detection-<your-unique-id>` | ⬜ |
+| `S3_BUCKET_NAME` | `fake-review-detector-020882464590` | ✅ Active |
 
 ### 2.4 ECR Repository
 
@@ -73,8 +73,8 @@ aws ecr create-repository --repository-name fake-review-detector --region us-eas
 
 | Key | Value | Status |
 |-----|-------|--------|
-| `ECR_REPOSITORY_URI` | `<account-id>.dkr.ecr.us-east-1.amazonaws.com/fake-review-detector` | ⬜ |
-| `AWS_ACCOUNT_ID` | `123456789012` | ⬜ |
+| `ECR_REPOSITORY_URI` | `020882464590.dkr.ecr.us-east-1.amazonaws.com/fake-review-detector` | ✅ Active |
+| `AWS_ACCOUNT_ID` | `020882464590` | ✅ Verified |
 
 ---
 

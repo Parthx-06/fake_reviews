@@ -14,8 +14,8 @@ load_dotenv()
 def push_to_ecr():
     aws_key = os.getenv('AWS_ACCESS_KEY_ID')
     aws_secret = os.getenv('AWS_SECRET_ACCESS_KEY')
-    region = os.getenv('AWS_DEFAULT_REGION', 'ap-southeast-2')
-    account_id = os.getenv('AWS_ACCOUNT_ID', '948897434480')
+    region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
+    account_id = os.getenv('AWS_ACCOUNT_ID', '020882464590')
     repo_name = 'fake-review-detector'
 
     ecr = boto3.client('ecr', aws_access_key_id=aws_key, aws_secret_access_key=aws_secret, region_name=region)
